@@ -7,6 +7,8 @@
   let lastUrl = window.location.href;
   let asanaGitObserver = null;
 
+  console.log('[Asana Git] Extension loaded');
+
   function extractTaskId() {
     const match = window.location.pathname.match(/task\/(\d+)/);
     return match ? match[1] : null;
@@ -304,23 +306,33 @@
   }
 
   function injectButton() {
+    console.log('[Asana Git] injectButton called, branchButton exists:', !!branchButton, 'has parent:', !!(branchButton && branchButton.parentNode));
+
     if (branchButton && branchButton.parentNode) {
+      console.log('[Asana Git] Button already exists, skipping injection');
       return true;
     }
 
     const moreActionsButton = document.querySelector('div[role="button"][aria-label="More actions for this task"]');
+    console.log('[Asana Git] More actions button found:', !!moreActionsButton);
 
     if (moreActionsButton) {
       const parent = moreActionsButton.parentElement;
+      console.log('[Asana Git] Parent element:', !!parent);
+
       if (parent) {
         branchButton = createButton();
+        console.log('[Asana Git] Button created, inserting after More actions button');
         parent.insertBefore(branchButton, moreActionsButton.nextSibling);
+        console.log('[Asana Git] Button inserted successfully');
         return true;
       }
     }
 
+    console.log('[Asana Git] More actions button not found, trying fallback');
     const injectionPoint = findInjectionPoint();
     if (!injectionPoint) {
+      console.log('[Asana Git] No injection point found');
       return false;
     }
 
@@ -346,7 +358,7 @@
 
   function init() {
     const isTaskPage = window.location.pathname.includes('/task/');
-    console.log('[Asana Git] Init called, URL:', window.location.href);
+    console.log('[Asana Git] Init called, isTaskPage:', isTaskPage, 'URL:', window.location.href);
 
     if (!isTaskPage) {
       if (currentTaskId) {
@@ -372,9 +384,11 @@
   }
 
   function tryInject() {
+    console.log('[Asana Git] tryInject called');
     if (asanaGitObserver) {
       asanaGitObserver.disconnect();
       asanaGitObserver = null;
+      console.log('[Asana Git] Old observer disconnected');
     }
 
     let attempts = 0;
@@ -382,6 +396,7 @@
 
     const attemptInjection = () => {
       attempts++;
+      console.log(`[Asana Git] Injection attempt ${attempts}/${maxAttempts}`);
 
       if (injectButton()) {
         return;
@@ -397,8 +412,10 @@
     attemptInjection();
 
     asanaGitObserver = new MutationObserver(() => {
+      console.log('[Asana Git] MutationObserver triggered');
       const moreActionsButton = document.querySelector('div[role="button"][aria-label="More actions for this task"]');
       if (moreActionsButton && (!branchButton || !branchButton.parentNode)) {
+        console.log('[Asana Git] More actions button found, calling injectButton');
         injectButton();
       }
     });
@@ -407,6 +424,7 @@
       childList: true,
       subtree: true
     });
+    console.log('[Asana Git] New observer attached to document.body');
   }
 
   const originalPushState = history.pushState;
