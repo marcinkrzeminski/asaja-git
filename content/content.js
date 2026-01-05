@@ -4,6 +4,7 @@
   let branchButton = null;
   let dropdown = null;
   let currentTaskId = null;
+  let lastUrl = window.location.href;
 
   function extractTaskId() {
     const match = window.location.pathname.match(/task\/(\d+)/);
@@ -26,6 +27,15 @@
     if (branchButton && branchButton.parentNode) {
       branchButton.parentNode.removeChild(branchButton);
       branchButton = null;
+    }
+  }
+
+  function checkUrlChange() {
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastUrl) {
+      console.log('[Asana Git] URL changed from', lastUrl, 'to', currentUrl);
+      lastUrl = currentUrl;
+      init();
     }
   }
 
@@ -299,11 +309,10 @@
   }
 
   function injectButton() {
-    // Always remove old button first to handle task navigation
+    // Check if button already exists in DOM
     if (branchButton && branchButton.parentNode) {
-      branchButton.parentNode.removeChild(branchButton);
-      branchButton = null;
-      console.log('[Asana Git] Removed old button for re-injection');
+      console.log('[Asana Git] Button already exists');
+      return true;
     }
 
     // Find the Close details button specifically
@@ -350,8 +359,8 @@
   }
 
   function init() {
-    const isTaskPage = window.location.pathname.match(/\/task\/\d+/);
-    console.log('[Asana Git] Init called, is task page:', !!isTaskPage);
+    const isTaskPage = window.location.pathname.includes('/task/');
+    console.log('[Asana Git] Init called, URL:', window.location.href);
 
     if (!isTaskPage) {
       // If we're not on a task page anymore, cleanup
@@ -366,74 +375,76 @@
     const newTaskId = extractTaskId();
     console.log('[Asana Git] Current task ID:', currentTaskId, 'New task ID:', newTaskId);
 
-    // Check if task changed
-    if (newTaskId && newTaskId !== currentTaskId) {
-      console.log('[Asana Git] Task changed, cleaning up old button');
+    // Check if task changed or button doesn't exist
+    const buttonExists = branchButton && branchButton.parentNode;
+    if (newTaskId && (newTaskId !== currentTaskId || !buttonExists)) {
+      console.log('[Asana Git] Task changed or button missing, re-injecting');
       cleanup();
       currentTaskId = newTaskId;
-    }
-
-    console.log('[Asana Git] Starting injection process');
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-          console.log('[Asana Git] DOM loaded, trying injection');
-          tryInject();
-        }, 1000);
-      });
-    } else {
-      console.log('[Asana Git] DOM ready, trying injection now');
       tryInject();
+    } else if (buttonExists) {
+      console.log('[Asana Git] Button already exists for current task');
     }
   }
 
   function tryInject() {
-    if (injectButton()) {
-      console.log('[Asana Git] Button successfully injected');
-      return;
-    }
+    let attempts = 0;
+    const maxAttempts = 30; // Try for 15 seconds (30 * 500ms)
 
-    console.log('[Asana Git] Initial injection failed, setting up MutationObserver');
-    const observer = new MutationObserver((mutations) => {
+    const attemptInjection = () => {
+      attempts++;
+      console.log(`[Asana Git] Injection attempt ${attempts}/${maxAttempts}`);
+
       if (injectButton()) {
-        console.log('[Asana Git] Button injected via MutationObserver');
+        console.log('[Asana Git] Button successfully injected');
+        return;
       }
-    });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    // Keep observer running longer to handle SPA navigation
-    setTimeout(() => {
-      if (injectButton()) {
-        console.log('[Asana Git] Button injected via delayed retry');
-      } else {
-        console.log('[Asana Git] Injection timeout, keeping observer active for navigation');
+      if (attempts >= maxAttempts) {
+        console.log('[Asana Git] Failed to inject after max attempts');
+        return;
       }
-    }, 10000);
 
-    // Store observer reference for cleanup
-    window.asanaGitObserver = observer;
+      // Try again in 500ms
+      setTimeout(attemptInjection, 500);
+    };
+
+    attemptInjection();
   }
 
+  // Override history methods to detect navigation
   const originalPushState = history.pushState;
   history.pushState = function() {
-    originalPushState.apply(this, arguments);
-    setTimeout(init, 500);
+    const result = originalPushState.apply(this, arguments);
+    console.log('[Asana Git] pushState called');
+    setTimeout(() => {
+      checkUrlChange();
+    }, 100);
+    return result;
   };
 
   const originalReplaceState = history.replaceState;
   history.replaceState = function() {
-    originalReplaceState.apply(this, arguments);
-    setTimeout(init, 500);
+    const result = originalReplaceState.apply(this, arguments);
+    console.log('[Asana Git] replaceState called');
+    setTimeout(() => {
+      checkUrlChange();
+    }, 100);
+    return result;
   };
 
   window.addEventListener('popstate', () => {
-    setTimeout(init, 500);
+    console.log('[Asana Git] popstate event');
+    setTimeout(() => {
+      checkUrlChange();
+    }, 100);
   });
 
+  // Also poll for URL changes (for any other navigation methods)
+  setInterval(() => {
+    checkUrlChange();
+  }, 1000);
+
+  // Initial init
   init();
 })();
