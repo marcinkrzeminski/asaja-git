@@ -273,5 +273,27 @@
     }
   }
 
+  function init() {
+    const isTaskPage = window.location.pathname.includes('/task/');
+    console.log('[Asana Git] Init called, isTaskPage:', isTaskPage);
+
+    if (!isTaskPage) {
+      if (currentTaskId) {
+        cleanup();
+        currentTaskId = null;
+      }
+      return;
+    }
+
+    const newTaskId = extractTaskId();
+    if (newTaskId && newTaskId !== currentTaskId) {
+      cleanup();
+      currentTaskId = newTaskId;
+      renderedElements.clear();
+    }
+
+    observeTaskPanes();
+  }
+
   init();
 })();
