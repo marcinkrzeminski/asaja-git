@@ -290,35 +290,6 @@
     return true;
   }
 
-    const injectionPoint = findInjectionPoint();
-    if (!injectionPoint) {
-      console.log('[Asana Git] No injection point found');
-      return false;
-    }
-
-    branchButton = createButton();
-
-    if (injectionPoint.method === 'toolbar') {
-      const buttons = injectionPoint.element.querySelectorAll('button');
-      if (buttons.length > 1) {
-        injectionPoint.element.insertBefore(branchButton, buttons[buttons.length - 1]);
-        console.log('[Asana Git] Button injected into toolbar as second-to-last');
-      } else {
-        injectionPoint.element.appendChild(branchButton);
-        console.log('[Asana Git] Button injected into toolbar (append)');
-      }
-    } else if (injectionPoint.method === 'near-title') {
-      const container = document.createElement('div');
-      container.className = 'asana-git-button-container';
-      container.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
-      container.appendChild(branchButton);
-      injectionPoint.element.appendChild(container);
-      console.log('[Asana Git] Button injected near task title');
-    }
-
-    return true;
-  }
-
   function init() {
     const isTaskPage = window.location.pathname.match(/\/task\/\d+/);
     console.log('[Asana Git] Init called, is task page:', !!isTaskPage);
