@@ -1,36 +1,36 @@
 # Tasks: Asana Git Branch Generator
 
 ## Phase 1: Setup
-- [ ] Create project structure
-- [ ] Create manifest.json with V3 config
-- [ ] Create content script structure
-- [ ] Set up URL pattern matching
+- [x] Create project structure
+- [x] Create manifest.json with V3 config
+- [x] Create content script structure
+- [x] Set up URL pattern matching
 
 ## Phase 2: Task Data Extraction
-- [ ] Implement URL parsing to extract task ID
-- [ ] Implement task title extraction from textarea
-- [ ] Implement branch name generation with 32-char limit
-- [ ] Add error handling for missing elements
+- [x] Implement URL parsing to extract task ID
+- [x] Implement task title extraction from textarea
+- [x] Implement branch name generation with 32-char limit
+- [x] Add error handling for missing elements
 
 ## Phase 3: UI Injection
-- [ ] Create button element with SVG branch icon
-- [ ] Implement toolbar detection with multiple selector strategies
-- [ ] Inject button as second-to-last child
-- [ ] Create dropdown HTML structure
-- [ ] Style dropdown to match Asana's UI
+- [x] Create button element with SVG branch icon
+- [x] Implement toolbar detection with multiple selector strategies
+- [x] Inject button as second-to-last child
+- [x] Create dropdown HTML structure
+- [x] Style dropdown to match Asana's UI
 
 ## Phase 4: Interactivity
-- [ ] Add click handler to toggle dropdown visibility
-- [ ] Implement copy-to-clipboard functionality
-- [ ] Add "Copied!" feedback animation
-- [ ] Handle clicks outside dropdown to close it
-- [ ] Re-inject button on page navigation (SPA handling)
+- [x] Add click handler to toggle dropdown visibility
+- [x] Implement copy-to-clipboard functionality
+- [x] Add "Copied!" feedback animation
+- [x] Handle clicks outside dropdown to close it
+- [x] Re-inject button on page navigation (SPA handling)
 
 ## Phase 5: Refinement
-- [ ] Use MutationObserver to detect dynamic content changes
-- [ ] Add loading states (show button only after title loads)
-- [ ] Handle edge cases (very long titles, special characters)
-- [ ] Test across different Asana page states
+- [x] Use MutationObserver to detect dynamic content changes
+- [x] Add loading states (show button only after title loads)
+- [x] Handle edge cases (very long titles, special characters)
+- [x] Test across different Asana page states
 
 ## Testing
 - [ ] Button appears on task pages
