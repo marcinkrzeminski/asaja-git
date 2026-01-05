@@ -3,8 +3,12 @@
  * Run this in the Chrome DevTools console on an Asana task page
  */
 
+console.log('🚀 Starting Asana Git Branch Generator Debug...');
+
 (function() {
-  console.log('=== Asana Git Branch Generator Debug ===\n');
+  try {
+    console.log('✅ Debug helper is running');
+    console.log('=== Asana Git Branch Generator Debug ===\n');
 
   // Check if we're on a task page
   const isTaskPage = window.location.pathname.match(/\/task\/(\d+)/);
@@ -121,4 +125,8 @@
   console.log('\n=== Debug Complete ===');
   console.log('💡 Tip: Inspect elements by right-clicking and selecting "Inspect"');
   console.log('💡 Share the console output if you need help debugging');
+  } catch (error) {
+    console.error('❌ Error in debug helper:', error);
+    console.error('Stack trace:', error.stack);
+  }
 })();
