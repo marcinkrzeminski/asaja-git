@@ -22,6 +22,20 @@
     }
 
     const button = createButton();
+    moreActionsButton.parentNode.insertBefore(button, moreActionsButton.nextSibling);
+    renderedElements.add(taskPaneEl);
+    branchButton = button;
+  }
+
+    const moreActionsButton = taskPaneEl.querySelector(
+      '.TaskPaneExtraActionsButton',
+    );
+
+    if (!moreActionsButton) {
+      return;
+    }
+
+    const button = createButton();
     moreActionsButton.parentNode.insertBefore(button, moreActionsButton);
     renderedElements.add(taskPaneEl);
   }
@@ -132,7 +146,7 @@
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
 
-    const maxTitleLength = 32 - 'feature/'.length - shortId.length - 1;
+    const maxTitleLength = 24;
 
     if (sanitized.length <= maxTitleLength) {
       return `feature/${shortId}-${sanitized}`;
