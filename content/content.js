@@ -3,10 +3,30 @@
 
   let branchButton = null;
   let dropdown = null;
+  let currentTaskId = null;
 
   function extractTaskId() {
     const match = window.location.pathname.match(/task\/(\d+)/);
     return match ? match[1] : null;
+  }
+
+  function cleanup() {
+    // Disconnect observer if exists
+    if (window.asanaGitObserver) {
+      window.asanaGitObserver.disconnect();
+      window.asanaGitObserver = null;
+      console.log('[Asana Git] Disconnected observer');
+    }
+
+    if (dropdown && dropdown.parentNode) {
+      dropdown.parentNode.removeChild(dropdown);
+      dropdown = null;
+    }
+
+    if (branchButton && branchButton.parentNode) {
+      branchButton.parentNode.removeChild(branchButton);
+      branchButton = null;
+    }
   }
 
   function extractTaskTitle() {
@@ -279,9 +299,11 @@
   }
 
   function injectButton() {
+    // Always remove old button first to handle task navigation
     if (branchButton && branchButton.parentNode) {
-      console.log('[Asana Git] Button already injected');
-      return true;
+      branchButton.parentNode.removeChild(branchButton);
+      branchButton = null;
+      console.log('[Asana Git] Removed old button for re-injection');
     }
 
     // Find the Close details button specifically
@@ -332,7 +354,23 @@
     console.log('[Asana Git] Init called, is task page:', !!isTaskPage);
 
     if (!isTaskPage) {
+      // If we're not on a task page anymore, cleanup
+      if (currentTaskId) {
+        console.log('[Asana Git] Left task page, cleaning up');
+        cleanup();
+        currentTaskId = null;
+      }
       return;
+    }
+
+    const newTaskId = extractTaskId();
+    console.log('[Asana Git] Current task ID:', currentTaskId, 'New task ID:', newTaskId);
+
+    // Check if task changed
+    if (newTaskId && newTaskId !== currentTaskId) {
+      console.log('[Asana Git] Task changed, cleaning up old button');
+      cleanup();
+      currentTaskId = newTaskId;
     }
 
     console.log('[Asana Git] Starting injection process');
@@ -360,7 +398,6 @@
     const observer = new MutationObserver((mutations) => {
       if (injectButton()) {
         console.log('[Asana Git] Button injected via MutationObserver');
-        observer.disconnect();
       }
     });
 
@@ -369,15 +406,17 @@
       subtree: true
     });
 
+    // Keep observer running longer to handle SPA navigation
     setTimeout(() => {
       if (injectButton()) {
         console.log('[Asana Git] Button injected via delayed retry');
-        observer.disconnect();
       } else {
-        console.log('[Asana Git] Injection failed after timeout');
-        observer.disconnect();
+        console.log('[Asana Git] Injection timeout, keeping observer active for navigation');
       }
     }, 10000);
+
+    // Store observer reference for cleanup
+    window.asanaGitObserver = observer;
   }
 
   const originalPushState = history.pushState;
