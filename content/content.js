@@ -52,7 +52,17 @@
       .replace(/-+/g, '-');
 
     const maxTitleLength = 32 - shortId.length - 1;
+
+    if (sanitized.length <= maxTitleLength) {
+      return `feature/${shortId}-${sanitized}`;
+    }
+
     const truncatedTitle = sanitized.slice(0, maxTitleLength);
+
+    const lastHyphenIndex = truncatedTitle.lastIndexOf('-');
+    if (lastHyphenIndex > 0) {
+      return `feature/${shortId}-${truncatedTitle.slice(0, lastHyphenIndex)}`;
+    }
 
     return `feature/${shortId}-${truncatedTitle}`;
   }
