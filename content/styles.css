@@ -2,8 +2,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -12,6 +12,7 @@
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
   outline: none;
+  margin-left: 8px;
 }
 
 .asana-git-branch-btn:hover {
