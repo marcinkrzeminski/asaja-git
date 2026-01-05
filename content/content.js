@@ -136,8 +136,42 @@
         document.body.appendChild(dropdown);
 
         const buttonRect = branchButton.getBoundingClientRect();
-        dropdown.style.top = `${buttonRect.bottom + 5}px`;
-        dropdown.style.left = `${buttonRect.left}px`;
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const dropdownHeight = dropdown.offsetHeight;
+        const dropdownWidth = dropdown.offsetWidth;
+
+        // Calculate vertical position (above or below button)
+        const spaceBelow = viewportHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+
+        let top, left;
+
+        if (spaceBelow >= dropdownHeight + 10) {
+          // Enough space below - position below
+          top = buttonRect.bottom + 5;
+        } else if (spaceAbove >= dropdownHeight + 10) {
+          // Enough space above - position above
+          top = buttonRect.top - dropdownHeight - 5;
+        } else {
+          // Not enough space either way - position where there's more room
+          top = spaceBelow >= spaceAbove ? buttonRect.bottom + 5 : buttonRect.top - dropdownHeight - 5;
+        }
+
+        // Calculate horizontal position (keep on screen)
+        if (buttonRect.left + dropdownWidth > viewportWidth - 10) {
+          // Would go off right edge - align right edge with button
+          left = viewportWidth - dropdownWidth - 10;
+        } else if (buttonRect.left < 10) {
+          // Would go off left edge
+          left = 10;
+        } else {
+          // Use button's left position
+          left = buttonRect.left;
+        }
+
+        dropdown.style.top = `${top}px`;
+        dropdown.style.left = `${left}px`;
 
         setTimeout(() => {
           document.addEventListener('click', handleOutsideClick);
