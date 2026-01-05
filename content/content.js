@@ -55,6 +55,16 @@
       childList: true,
       subtree: true,
     });
+
+    setInterval(() => {
+      const allTaskPanes = document.querySelectorAll('.TaskPane');
+      allTaskPanes.forEach((pane) => {
+        if (!pane.classList.contains('asana-git-observed')) {
+          pane.classList.add('asana-git-observed');
+          renderTaskPaneButton(pane);
+        }
+      });
+    }, 2000);
   }
 
   console.log('[Asana Git] Extension loaded');
