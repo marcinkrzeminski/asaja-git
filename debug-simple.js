@@ -34,27 +34,41 @@ testElements.forEach((el, i) => {
 });
 
 // 4. Search for potential toolbars
-console.log('\nSearching for toolbars...');
-const searchTerms = ['toolbar', 'action', 'pane', 'top-bar'];
-document.querySelectorAll('*').forEach(el => {
-  const id = el.id || '';
-  const className = el.className || '';
-  const dataTestId = el.getAttribute('data-test-id') || '';
+console.log('\nSearching for elements with multiple buttons (potential action bars)...');
+const candidates = [];
+document.querySelectorAll('div, section, nav, header').forEach(el => {
+  const buttons = el.querySelectorAll('button');
+  if (buttons.length >= 2 && buttons.length <= 10) {
+    const className = el.className || '';
+    const id = el.id || '';
+    const dataTestId = el.getAttribute('data-test-id') || '';
 
-  if (id.toLowerCase().includes('toolbar') ||
-      className.toLowerCase().includes('toolbar') ||
-      dataTestId.toLowerCase().includes('toolbar') ||
-      dataTestId.toLowerCase().includes('action') ||
-      className.toLowerCase().includes('action')) {
-    console.log(`Found:`, {
-      tag: el.tagName,
-      id: id,
-      className: className.slice(0, 50),
-      dataTestId: dataTestId,
-      children: el.children.length
-    });
+    if (className.toLowerCase().includes('action') ||
+        className.toLowerCase().includes('toolbar') ||
+        id.toLowerCase().includes('action') ||
+        dataTestId.toLowerCase().includes('action') ||
+        dataTestId.toLowerCase().includes('top')) {
+      candidates.push({
+        tag: el.tagName,
+        id: id,
+        className: className.slice(0, 60),
+        dataTestId: dataTestId,
+        buttonCount: buttons.length,
+        buttonTexts: Array.from(buttons).slice(0, 3).map(b => b.textContent.trim().slice(0, 20))
+      });
+    }
   }
 });
+
+if (candidates.length > 0) {
+  console.log('Found', candidates.length, 'candidate action bars:');
+  candidates.forEach((c, i) => {
+    console.log(`  ${i + 1}. ${c.className || c.id || c.dataTestId}`);
+    console.log(`     Buttons: ${c.buttonCount}, Examples:`, c.buttonTexts);
+  });
+} else {
+  console.log('No candidate action bars found');
+}
 
 // 5. List all buttons with text
 console.log('\nButtons with text:');

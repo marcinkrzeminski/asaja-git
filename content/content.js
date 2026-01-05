@@ -175,24 +175,62 @@
     for (const selector of selectors) {
       const element = document.querySelector(selector);
       if (element) {
+        // Skip the text editor toolbar (it has [role="toolbar"] but 0 buttons)
+        if (selector === '[role="toolbar"]') {
+          const buttons = element.querySelectorAll('button');
+          if (buttons.length === 0) {
+            console.log('[Asana Git] Skipping text editor toolbar (no buttons)');
+            continue;
+          }
+        }
         console.log('[Asana Git] Found toolbar:', selector, element);
         return element;
       }
     }
 
-    console.log('[Asana Git] No toolbar found with selectors');
+    console.log('[Asana Git] No toolbar found with selectors, searching for containers with buttons...');
+
+    // Fallback: Find elements with multiple buttons that look like action bars
+    const potentialToolbars = document.querySelectorAll('div, section, nav, header');
+    for (const el of potentialToolbars) {
+      const buttons = el.querySelectorAll('button');
+      if (buttons.length >= 2 && buttons.length <= 10) {
+        const className = el.className || '';
+        const id = el.id || '';
+        const dataTestId = el.getAttribute('data-test-id') || '';
+
+        // Look for action-related classes/IDs
+        const isActionRelated =
+          className.toLowerCase().includes('action') ||
+          className.toLowerCase().includes('toolbar') ||
+          id.toLowerCase().includes('action') ||
+          dataTestId.toLowerCase().includes('action') ||
+          dataTestId.toLowerCase().includes('top');
+
+        if (isActionRelated && !className.includes('TextEditor')) {
+          console.log('[Asana Git] Found potential action bar:', className, id, dataTestId, buttons.length, 'buttons');
+          return el;
+        }
+      }
+    }
+
+    console.log('[Asana Git] No toolbar found');
     return null;
   }
 
   function findInjectionPoint() {
     const toolbar = findToolbar();
     if (toolbar) {
-      return { element: toolbar, method: 'toolbar' };
+      const buttons = toolbar.querySelectorAll('button');
+      console.log('[Asana Git] Toolbar has', buttons.length, 'buttons');
+      if (buttons.length > 0) {
+        return { element: toolbar, method: 'toolbar' };
+      }
     }
 
     const taskNameTextarea = document.querySelector('textarea[aria-label="Task Name"]');
     if (taskNameTextarea) {
-      const parent = taskNameTextarea.closest('.TaskPanePane-content, .TaskPane-content, .task-pane-content');
+      const parent = taskNameTextarea.closest('.TaskPanePane-content, .TaskPane-content, .task-pane-content, .TaskPane');
       if (parent) {
         console.log('[Asana Git] Found task name parent, will inject there');
         return { element: parent, method: 'near-title' };
