@@ -124,9 +124,12 @@
 
   function toggleDropdown() {
     if (dropdown && dropdown.parentNode) {
+      // Close dropdown
       dropdown.parentNode.removeChild(dropdown);
       dropdown = null;
+      document.removeEventListener('click', handleOutsideClick);
     } else {
+      // Open dropdown
       const taskId = extractTaskId();
       const taskTitle = extractTaskTitle();
       const branchName = generateBranchName(taskId, taskTitle);
