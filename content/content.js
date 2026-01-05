@@ -371,15 +371,12 @@
 
     const attemptInjection = () => {
       attempts++;
-      console.log(`[Asana Git] Injection attempt ${attempts}/${maxAttempts}`);
 
       if (injectButton()) {
-        console.log('[Asana Git] Button successfully injected');
         return;
       }
 
       if (attempts >= maxAttempts) {
-        console.log('[Asana Git] Failed to inject after max attempts');
         return;
       }
 
@@ -387,6 +384,20 @@
     };
 
     attemptInjection();
+
+    const observer = new MutationObserver(() => {
+      const moreActionsButton = document.querySelector('div[role="button"][aria-label="More actions for this task"]');
+      if (moreActionsButton && (!branchButton || !branchButton.parentNode)) {
+        injectButton();
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    window.asanaGitObserver = observer;
   }
 
   const originalPushState = history.pushState;
