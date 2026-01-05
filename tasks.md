@@ -57,3 +57,4 @@
 - [x] Fix branch name truncation (truncate at word boundaries)
 - [x] Make copy button smaller with proper spacing
 - [x] Fix dropdown positioning to be relative to button
+- [x] Fix view switching (re-inject on DOM changes)
