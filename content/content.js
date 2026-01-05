@@ -132,7 +132,7 @@
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
 
-    const maxTitleLength = 32 - shortId.length - 1;
+    const maxTitleLength = 32 - 'feature/'.length - shortId.length - 1;
 
     if (sanitized.length <= maxTitleLength) {
       return `feature/${shortId}-${sanitized}`;
