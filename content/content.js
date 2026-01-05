@@ -247,6 +247,49 @@
       return true;
     }
 
+    // Find the Close details button specifically
+    const closeButton = document.querySelector('div[role="button"][aria-label="Close details"]');
+
+    if (closeButton) {
+      const parent = closeButton.parentElement;
+      if (parent) {
+        branchButton = createButton();
+        parent.insertBefore(branchButton, closeButton);
+        console.log('[Asana Git] Button injected before Close details button');
+        return true;
+      }
+    }
+
+    console.log('[Asana Git] Close details button not found, trying fallback');
+    const injectionPoint = findInjectionPoint();
+    if (!injectionPoint) {
+      console.log('[Asana Git] No injection point found');
+      return false;
+    }
+
+    branchButton = createButton();
+
+    if (injectionPoint.method === 'toolbar') {
+      const buttons = injectionPoint.element.querySelectorAll('button, div[role="button"]');
+      if (buttons.length > 1) {
+        injectionPoint.element.insertBefore(branchButton, buttons[buttons.length - 1]);
+        console.log('[Asana Git] Button injected into toolbar as second-to-last');
+      } else {
+        injectionPoint.element.appendChild(branchButton);
+        console.log('[Asana Git] Button injected into toolbar (append)');
+      }
+    } else if (injectionPoint.method === 'near-title') {
+      const container = document.createElement('div');
+      container.className = 'asana-git-button-container';
+      container.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
+      container.appendChild(branchButton);
+      injectionPoint.element.appendChild(container);
+      console.log('[Asana Git] Button injected near task title');
+    }
+
+    return true;
+  }
+
     const injectionPoint = findInjectionPoint();
     if (!injectionPoint) {
       console.log('[Asana Git] No injection point found');
