@@ -12,13 +12,6 @@
   }
 
   function cleanup() {
-    // Disconnect observer if exists
-    if (window.asanaGitObserver) {
-      window.asanaGitObserver.disconnect();
-      window.asanaGitObserver = null;
-      console.log('[Asana Git] Disconnected observer');
-    }
-
     if (dropdown && dropdown.parentNode) {
       dropdown.parentNode.removeChild(dropdown);
       dropdown = null;
@@ -33,7 +26,6 @@
   function checkUrlChange() {
     const currentUrl = window.location.href;
     if (currentUrl !== lastUrl) {
-      console.log('[Asana Git] URL changed from', lastUrl, 'to', currentUrl);
       lastUrl = currentUrl;
       init();
     }
@@ -154,12 +146,10 @@
 
   function toggleDropdown() {
     if (dropdown && dropdown.parentNode) {
-      // Close dropdown
       dropdown.parentNode.removeChild(dropdown);
       dropdown = null;
       document.removeEventListener('click', handleOutsideClick);
     } else {
-      // Open dropdown
       const taskId = extractTaskId();
       const taskTitle = extractTaskTitle();
       const branchName = generateBranchName(taskId, taskTitle);
@@ -174,32 +164,24 @@
         const dropdownHeight = dropdown.offsetHeight;
         const dropdownWidth = dropdown.offsetWidth;
 
-        // Calculate vertical position (above or below button)
         const spaceBelow = viewportHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
 
         let top, left;
 
         if (spaceBelow >= dropdownHeight + 10) {
-          // Enough space below - position below
           top = buttonRect.bottom + 5;
         } else if (spaceAbove >= dropdownHeight + 10) {
-          // Enough space above - position above
           top = buttonRect.top - dropdownHeight - 5;
         } else {
-          // Not enough space either way - position where there's more room
           top = spaceBelow >= spaceAbove ? buttonRect.bottom + 5 : buttonRect.top - dropdownHeight - 5;
         }
 
-        // Calculate horizontal position (keep on screen)
         if (buttonRect.left + dropdownWidth > viewportWidth - 10) {
-          // Would go off right edge - align right edge with button
           left = viewportWidth - dropdownWidth - 10;
         } else if (buttonRect.left < 10) {
-          // Would go off left edge
           left = 10;
         } else {
-          // Use button's left position
           left = buttonRect.left;
         }
 
@@ -242,7 +224,6 @@
     for (const selector of selectors) {
       const element = document.querySelector(selector);
       if (element) {
-        // Skip the text editor toolbar (it has [role="toolbar"] but 0 buttons)
         if (selector === '[role="toolbar"]') {
           const buttons = element.querySelectorAll('button');
           if (buttons.length === 0) {
@@ -257,7 +238,6 @@
 
     console.log('[Asana Git] No toolbar found with selectors, searching for containers with buttons...');
 
-    // Fallback: Find elements with multiple buttons that look like action bars
     const potentialToolbars = document.querySelectorAll('div, section, nav, header');
     for (const el of potentialToolbars) {
       const buttons = el.querySelectorAll('button');
@@ -266,7 +246,6 @@
         const id = el.id || '';
         const dataTestId = el.getAttribute('data-test-id') || '';
 
-        // Look for action-related classes/IDs
         const isActionRelated =
           className.toLowerCase().includes('action') ||
           className.toLowerCase().includes('toolbar') ||
@@ -309,13 +288,11 @@
   }
 
   function injectButton() {
-    // Check if button already exists in DOM
     if (branchButton && branchButton.parentNode) {
       console.log('[Asana Git] Button already exists');
       return true;
     }
 
-    // Find the Close details button specifically
     const closeButton = document.querySelector('div[role="button"][aria-label="Close details"]');
 
     if (closeButton) {
@@ -363,7 +340,6 @@
     console.log('[Asana Git] Init called, URL:', window.location.href);
 
     if (!isTaskPage) {
-      // If we're not on a task page anymore, cleanup
       if (currentTaskId) {
         console.log('[Asana Git] Left task page, cleaning up');
         cleanup();
@@ -375,7 +351,6 @@
     const newTaskId = extractTaskId();
     console.log('[Asana Git] Current task ID:', currentTaskId, 'New task ID:', newTaskId);
 
-    // Check if task changed or button doesn't exist
     const buttonExists = branchButton && branchButton.parentNode;
     if (newTaskId && (newTaskId !== currentTaskId || !buttonExists)) {
       console.log('[Asana Git] Task changed or button missing, re-injecting');
@@ -389,7 +364,7 @@
 
   function tryInject() {
     let attempts = 0;
-    const maxAttempts = 30; // Try for 15 seconds (30 * 500ms)
+    const maxAttempts = 30;
 
     const attemptInjection = () => {
       attempts++;
@@ -405,14 +380,12 @@
         return;
       }
 
-      // Try again in 500ms
       setTimeout(attemptInjection, 500);
     };
 
     attemptInjection();
   }
 
-  // Override history methods to detect navigation
   const originalPushState = history.pushState;
   history.pushState = function() {
     const result = originalPushState.apply(this, arguments);
@@ -440,11 +413,9 @@
     }, 100);
   });
 
-  // Also poll for URL changes (for any other navigation methods)
   setInterval(() => {
     checkUrlChange();
   }, 1000);
 
-  // Initial init
   init();
 })();
