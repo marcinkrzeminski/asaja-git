@@ -26,6 +26,19 @@
     renderedElements.add(taskPaneEl);
   }
 
+    const moreActionsButton = taskPaneEl.querySelector(
+      '.TaskPaneExtraActionsButton',
+    );
+
+    if (!moreActionsButton) {
+      return;
+    }
+
+    const button = createButton();
+    moreActionsButton.parentNode.insertBefore(button, moreActionsButton);
+    renderedElements.add(taskPaneEl);
+  }
+
   function observeTaskPanes() {
     const taskPanes = document.querySelectorAll('.TaskPane:not(.asana-git-observed)');
 
@@ -236,39 +249,48 @@
         dropdown = createDropdown(branchName);
         document.body.appendChild(dropdown);
 
-        const buttonRect = branchButton.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        const dropdownHeight = dropdown.offsetHeight;
-        const dropdownWidth = dropdown.offsetWidth;
+        requestAnimationFrame(() => {
+          if (!branchButton || !branchButton.parentNode) {
+            if (dropdown && dropdown.parentNode) {
+              dropdown.parentNode.removeChild(dropdown);
+            }
+            return;
+          }
 
-        const spaceBelow = viewportHeight - buttonRect.bottom;
-        const spaceAbove = buttonRect.top;
+          const buttonRect = branchButton.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const viewportWidth = window.innerWidth;
+          const dropdownHeight = dropdown.offsetHeight;
+          const dropdownWidth = dropdown.offsetWidth;
 
-        let top, left;
+          const spaceBelow = viewportHeight - buttonRect.bottom;
+          const spaceAbove = buttonRect.top;
 
-        if (spaceBelow >= dropdownHeight + 10) {
-          top = buttonRect.bottom + 5;
-        } else if (spaceAbove >= dropdownHeight + 10) {
-          top = buttonRect.top - dropdownHeight - 5;
-        } else {
-          top = spaceBelow >= spaceAbove ? buttonRect.bottom + 5 : buttonRect.top - dropdownHeight - 5;
-        }
+          let top, left;
 
-        if (buttonRect.left + dropdownWidth > viewportWidth - 10) {
-          left = buttonRect.right - dropdownWidth;
-        } else if (buttonRect.left < 10) {
-          left = 10;
-        } else {
-          left = buttonRect.left;
-        }
+          if (spaceBelow >= dropdownHeight + 10) {
+            top = buttonRect.bottom + 5;
+          } else if (spaceAbove >= dropdownHeight + 10) {
+            top = buttonRect.top - dropdownHeight - 5;
+          } else {
+            top = spaceBelow >= spaceAbove ? buttonRect.bottom + 5 : buttonRect.top - dropdownHeight - 5;
+          }
 
-        dropdown.style.top = `${top}px`;
-        dropdown.style.left = `${left}px`;
+          if (buttonRect.left + dropdownWidth > viewportWidth - 10) {
+            left = buttonRect.right - dropdownWidth;
+          } else if (buttonRect.left < 10) {
+            left = 10;
+          } else {
+            left = buttonRect.left;
+          }
 
-        setTimeout(() => {
-          document.addEventListener('click', handleOutsideClick);
-        }, 0);
+          dropdown.style.top = `${top}px`;
+          dropdown.style.left = `${left}px`;
+
+          setTimeout(() => {
+            document.addEventListener('click', handleOutsideClick);
+          }, 0);
+        });
       }
     }
   }
