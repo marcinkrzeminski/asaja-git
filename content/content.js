@@ -5,6 +5,7 @@
   let dropdown = null;
   let currentTaskId = null;
   let lastUrl = window.location.href;
+  let asanaGitObserver = null;
 
   function extractTaskId() {
     const match = window.location.pathname.match(/task\/(\d+)/);
@@ -12,6 +13,11 @@
   }
 
   function cleanup() {
+    if (asanaGitObserver) {
+      asanaGitObserver.disconnect();
+      asanaGitObserver = null;
+    }
+
     if (dropdown && dropdown.parentNode) {
       dropdown.parentNode.removeChild(dropdown);
       dropdown = null;
@@ -366,6 +372,11 @@
   }
 
   function tryInject() {
+    if (asanaGitObserver) {
+      asanaGitObserver.disconnect();
+      asanaGitObserver = null;
+    }
+
     let attempts = 0;
     const maxAttempts = 30;
 
@@ -385,19 +396,17 @@
 
     attemptInjection();
 
-    const observer = new MutationObserver(() => {
+    asanaGitObserver = new MutationObserver(() => {
       const moreActionsButton = document.querySelector('div[role="button"][aria-label="More actions for this task"]');
       if (moreActionsButton && (!branchButton || !branchButton.parentNode)) {
         injectButton();
       }
     });
 
-    observer.observe(document.body, {
+    asanaGitObserver.observe(document.body, {
       childList: true,
       subtree: true
     });
-
-    window.asanaGitObserver = observer;
   }
 
   const originalPushState = history.pushState;
