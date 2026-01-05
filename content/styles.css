@@ -158,7 +158,14 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .asana-git-branch-btn {
+.asana-git-button-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 0;
+}
+
+.asana-git-branch-btn {
     color: #9aa0a6;
   }
 

@@ -159,65 +159,118 @@
   function findToolbar() {
     const selectors = [
       '[data-test-id="task-pane-actions"]',
+      '[data-test-id="top-bar"]',
+      '[data-test-id="task-top-bar"]',
       '.TaskPaneActions',
       '[role="toolbar"]',
       '.TaskToolbar-paneToolbar',
-      '.top-bar'
+      '.top-bar',
+      '.TaskPaneHeaderActions',
+      '.TaskPanePrimaryActions',
+      '.TaskPane-paneToolbar',
+      '.TaskActionsToolbar',
+      '[data-test-id="task-details-pane-actions"]'
     ];
 
     for (const selector of selectors) {
       const element = document.querySelector(selector);
       if (element) {
+        console.log('[Asana Git] Found toolbar:', selector, element);
         return element;
       }
     }
 
+    console.log('[Asana Git] No toolbar found with selectors');
+    return null;
+  }
+
+  function findInjectionPoint() {
+    const toolbar = findToolbar();
+    if (toolbar) {
+      return { element: toolbar, method: 'toolbar' };
+    }
+
+    const taskNameTextarea = document.querySelector('textarea[aria-label="Task Name"]');
+    if (taskNameTextarea) {
+      const parent = taskNameTextarea.closest('.TaskPanePane-content, .TaskPane-content, .task-pane-content');
+      if (parent) {
+        console.log('[Asana Git] Found task name parent, will inject there');
+        return { element: parent, method: 'near-title' };
+      }
+    }
+
+    console.log('[Asana Git] Could not find injection point');
     return null;
   }
 
   function injectButton() {
     if (branchButton && branchButton.parentNode) {
-      return;
+      console.log('[Asana Git] Button already injected');
+      return true;
     }
 
-    const toolbar = findToolbar();
-    if (!toolbar) {
+    const injectionPoint = findInjectionPoint();
+    if (!injectionPoint) {
+      console.log('[Asana Git] No injection point found');
       return false;
     }
 
     branchButton = createButton();
-    const buttons = toolbar.querySelectorAll('button');
 
-    if (buttons.length > 1) {
-      toolbar.insertBefore(branchButton, buttons[buttons.length - 1]);
-    } else {
-      toolbar.appendChild(branchButton);
+    if (injectionPoint.method === 'toolbar') {
+      const buttons = injectionPoint.element.querySelectorAll('button');
+      if (buttons.length > 1) {
+        injectionPoint.element.insertBefore(branchButton, buttons[buttons.length - 1]);
+        console.log('[Asana Git] Button injected into toolbar as second-to-last');
+      } else {
+        injectionPoint.element.appendChild(branchButton);
+        console.log('[Asana Git] Button injected into toolbar (append)');
+      }
+    } else if (injectionPoint.method === 'near-title') {
+      const container = document.createElement('div');
+      container.className = 'asana-git-button-container';
+      container.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
+      container.appendChild(branchButton);
+      injectionPoint.element.appendChild(container);
+      console.log('[Asana Git] Button injected near task title');
     }
 
     return true;
   }
 
   function init() {
-    if (!window.location.pathname.match(/\/task\/\d+/)) {
+    const isTaskPage = window.location.pathname.match(/\/task\/\d+/);
+    console.log('[Asana Git] Init called, is task page:', !!isTaskPage);
+
+    if (!isTaskPage) {
       return;
     }
 
+    console.log('[Asana Git] Starting injection process');
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(tryInject, 1000);
+        setTimeout(() => {
+          console.log('[Asana Git] DOM loaded, trying injection');
+          tryInject();
+        }, 1000);
       });
     } else {
+      console.log('[Asana Git] DOM ready, trying injection now');
       tryInject();
     }
   }
 
   function tryInject() {
     if (injectButton()) {
+      console.log('[Asana Git] Button successfully injected');
       return;
     }
 
+    console.log('[Asana Git] Initial injection failed, setting up MutationObserver');
     const observer = new MutationObserver((mutations) => {
       if (injectButton()) {
+        console.log('[Asana Git] Button injected via MutationObserver');
         observer.disconnect();
       }
     });
@@ -227,7 +280,15 @@
       subtree: true
     });
 
-    setTimeout(() => observer.disconnect(), 10000);
+    setTimeout(() => {
+      if (injectButton()) {
+        console.log('[Asana Git] Button injected via delayed retry');
+        observer.disconnect();
+      } else {
+        console.log('[Asana Git] Injection failed after timeout');
+        observer.disconnect();
+      }
+    }, 10000);
   }
 
   const originalPushState = history.pushState;
