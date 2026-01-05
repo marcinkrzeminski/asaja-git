@@ -54,3 +54,6 @@
 - [x] Fix SPA navigation (re-inject when URL changes)
 - [x] Fix dropdown positioning (intelligent screen awareness)
 - [x] Clean up debug logs and comments
+- [x] Fix branch name truncation (truncate at word boundaries)
+- [x] Make copy button smaller with proper spacing
+- [x] Fix dropdown positioning to be relative to button
