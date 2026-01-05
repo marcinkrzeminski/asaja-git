@@ -289,26 +289,22 @@
 
   function injectButton() {
     if (branchButton && branchButton.parentNode) {
-      console.log('[Asana Git] Button already exists');
       return true;
     }
 
-    const closeButton = document.querySelector('div[role="button"][aria-label="Close details"]');
+    const moreActionsButton = document.querySelector('div[role="button"][aria-label="More actions for this task"]');
 
-    if (closeButton) {
-      const parent = closeButton.parentElement;
+    if (moreActionsButton) {
+      const parent = moreActionsButton.parentElement;
       if (parent) {
         branchButton = createButton();
-        parent.insertBefore(branchButton, closeButton);
-        console.log('[Asana Git] Button injected before Close details button');
+        parent.insertBefore(branchButton, moreActionsButton.nextSibling);
         return true;
       }
     }
 
-    console.log('[Asana Git] Close details button not found, trying fallback');
     const injectionPoint = findInjectionPoint();
     if (!injectionPoint) {
-      console.log('[Asana Git] No injection point found');
       return false;
     }
 
@@ -318,10 +314,8 @@
       const buttons = injectionPoint.element.querySelectorAll('button, div[role="button"]');
       if (buttons.length > 1) {
         injectionPoint.element.insertBefore(branchButton, buttons[buttons.length - 1]);
-        console.log('[Asana Git] Button injected into toolbar as second-to-last');
       } else {
         injectionPoint.element.appendChild(branchButton);
-        console.log('[Asana Git] Button injected into toolbar (append)');
       }
     } else if (injectionPoint.method === 'near-title') {
       const container = document.createElement('div');
@@ -329,7 +323,6 @@
       container.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
       container.appendChild(branchButton);
       injectionPoint.element.appendChild(container);
-      console.log('[Asana Git] Button injected near task title');
     }
 
     return true;

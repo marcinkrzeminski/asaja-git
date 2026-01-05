@@ -49,7 +49,7 @@
 
 ## Additional Fixes
 - [x] Fix toolbar detection (skip text editor toolbar)
-- [x] Fix button injection to place before Close details button
+- [x] Fix button injection to place after More actions button
 - [x] Fix toggle issue (remove click listener when closing)
 - [x] Fix SPA navigation (re-inject when URL changes)
 - [x] Fix dropdown positioning (intelligent screen awareness)
