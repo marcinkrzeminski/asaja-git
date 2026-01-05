@@ -178,7 +178,7 @@
         }
 
         if (buttonRect.left + dropdownWidth > viewportWidth - 10) {
-          left = viewportWidth - dropdownWidth - 10;
+          left = buttonRect.right - dropdownWidth;
         } else if (buttonRect.left < 10) {
           left = 10;
         } else {
