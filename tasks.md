@@ -33,16 +33,24 @@
 - [x] Test across different Asana page states
 
 ## Testing
-- [ ] Button appears on task pages
-- [ ] Button is positioned as second-to-last
-- [ ] Dropdown opens on click
-- [ ] Branch names are correctly formatted
-- [ ] Branch names are trimmed to 32 chars
-- [ ] Copy buttons work for both fields
-- [ ] "Copied!" feedback appears
-- [ ] Dropdown closes on outside click
-- [ ] Works after navigating between tasks
-- [ ] Handles long task titles
-- [ ] Handles special characters in titles
-- [ ] Works with empty task titles
-- [ ] Responsive on different screen sizes
+- [x] Button appears on task pages
+- [x] Button is positioned as second-to-last
+- [x] Dropdown opens on click
+- [x] Branch names are correctly formatted
+- [x] Branch names are trimmed to 32 chars
+- [x] Copy buttons work for both fields
+- [x] "Copied!" feedback appears
+- [x] Dropdown closes on outside click
+- [x] Works after navigating between tasks
+- [x] Handles long task titles
+- [x] Handles special characters in titles
+- [x] Works with empty task titles
+- [x] Responsive on different screen sizes
+
+## Additional Fixes
+- [x] Fix toolbar detection (skip text editor toolbar)
+- [x] Fix button injection to place before Close details button
+- [x] Fix toggle issue (remove click listener when closing)
+- [x] Fix SPA navigation (re-inject when URL changes)
+- [x] Fix dropdown positioning (intelligent screen awareness)
+- [x] Clean up debug logs and comments
