@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Asana Git Branch Generator",
+  "version": "1.0.0",
+  "description": "Generate Git branch names from Asana tasks",
+  "content_scripts": [
+    {
+      "matches": ["*://app.asana.com/*/task/*"],
+      "js": ["content/content.js"],
+      "css": ["content/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["activeTab"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
