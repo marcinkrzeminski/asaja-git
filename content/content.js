@@ -10,6 +10,7 @@
   let dropdown = null;
   let currentTaskId = null;
   let observer = null;
+  let urlCheckInterval = null;
 
   function extractTaskId() {
     const match = window.location.pathname.match(/task\/(\d+)/);
@@ -220,12 +221,23 @@
     return document.querySelector('.TaskPaneToolbar');
   }
 
+  function closeDropdownIfExists() {
+    if (dropdown && dropdown.parentNode) {
+      dropdown.parentNode.removeChild(dropdown);
+      dropdown = null;
+      document.removeEventListener('click', handleOutsideClick);
+      console.log('[Asana Git] Closed dropdown');
+    }
+  }
+
   function injectButton() {
     const taskPane = document.querySelector('.TaskPane:not(.asana-git-branch-injected)');
     
     if (!taskPane) {
       return false;
     }
+
+    closeDropdownIfExists();
 
     taskPane.classList.add('asana-git-branch-injected');
     console.log('[Asana Git] Found TaskPane, marking as injected');
@@ -299,16 +311,28 @@
 
   init();
 
+  function checkTaskChange() {
+    const newTaskId = extractTaskId();
+    if (newTaskId !== currentTaskId) {
+      console.log('[Asana Git] Task changed from', currentTaskId, 'to', newTaskId);
+      currentTaskId = newTaskId;
+      closeDropdownIfExists();
+      injectButton();
+    }
+  }
+
+  urlCheckInterval = setInterval(checkTaskChange, 100);
+
   window.addEventListener('popstate', () => {
     console.log('[Asana Git] URL changed, checking for button injection');
-    injectButton();
+    checkTaskChange();
   });
 
   const pushStateOriginal = history.pushState;
   history.pushState = function() {
     pushStateOriginal.apply(this, arguments);
     console.log('[Asana Git] URL changed (pushState), checking for button injection');
-    setTimeout(injectButton, 100);
+    checkTaskChange();
   };
 
   window.debugAsanaGit = () => {
