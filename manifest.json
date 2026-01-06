@@ -5,7 +5,7 @@
   "description": "Generate Git branch names from Asana tasks",
   "content_scripts": [
     {
-      "matches": ["*://app.asana.com/*/task/*"],
+      "matches": ["*://app.asana.com/*"],
       "js": ["content/content.js"],
       "css": ["content/styles.css"],
       "run_at": "document_idle"

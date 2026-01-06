@@ -1,9 +1,15 @@
 (function() {
   'use strict';
 
+  console.log('[Asana Git] ===================================================');
+  console.log('[Asana Git] Content script loaded');
+  console.log('[Asana Git] Current URL:', window.location.href);
+  console.log('[Asana Git] ===================================================');
+
   let branchButton = null;
   let dropdown = null;
   let currentTaskId = null;
+  let observer = null;
 
   function extractTaskId() {
     const match = window.location.pathname.match(/task\/(\d+)/);
@@ -48,12 +54,24 @@
 
   function createButton() {
     const button = document.createElement('button');
-    button.className = 'asana-git-branch-btn';
+    button.className = 'TaskPaneToolbar-button asana-git-branch-btn';
     button.setAttribute('type', 'button');
     button.setAttribute('aria-label', 'Generate Git branch name');
+    button.style.width = '28px';
+    button.style.height = '28px';
+    button.style.padding = '0';
+    button.style.border = '1px solid transparent';
+    button.style.borderRadius = '6px';
+    button.style.backgroundColor = 'transparent';
+    button.style.color = '#DE4C36';
+    button.style.cursor = 'pointer';
+    button.style.display = 'inline-flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.marginLeft = '8px';
     button.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor">
-        <path d="M251.172 116.594L139.4 4.828c-6.433-6.437-16.873-6.437-23.314 0l-23.21 23.21 29.443 29.443c6.842-2.312 14.688-.761 20.142 4.693 5.48 5.489 7.02 13.402 4.652 20.266l28.375 28.376c6.865-2.365 14.786-.835 20.269 4.657 7.663 7.663 20.075 0 27.74-7.665 7.666-20.08 7.663 20.076 0 0 0 1.5 188 3.71c7.663 7.663 20.076 0 0 1.5 19.282 298l7.15 6a1.498 1.499 0 1 1.414 1.415l-3.658 3.659a.999.999 0 1 1.408 1.415l-3.658 3.659c3.51-3.51-9.22 0 12.73l-1.552 10.032a1.997 1.997 0 0 1.24.94 26H10V1c0.0.6 0.4 1.1s-0.4,1.0 1.4-1 24v12c0.0.6 0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1s1,0 4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1.4,1 1.4,8,3,3,3,3.6.8,8 8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.4,1.1 4,8,3,3,3,3.6,8.8,8,8,8s1,0 4,4,4,0h12v1c0,0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1 1.4,8,3,3,3,3.6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.4,1.1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.1 4,8,3,3,3,3.6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.4,1 1 4,8,3,3,3,3,6,8.8,8,8 8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1 1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.4,1 1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.4,1.1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0,0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1 1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12v1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1v4c0,0.6,0.4 1.0 1.4,1 4,1.1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0h12V1c0.0.6,0.4 1.1s-0.4,1.0 1.4-1V4c0,0.6,0.4 1.0 1.1,1.4,1,4,1 1 4,1.1 4,8,3,3,3,3,6,8.8,8,8,8s1,0 4,4,4,0Z"></path>
+      <svg width="16" height="16" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+        <path d="M251.172245,116.593517 L139.398753,4.82845302 C132.966433,-1.60948434 122.525852,-1.60948434 116.085106,4.82845302 L92.8753863,28.0381721 L122.317995,57.4807809 C129.16041,55.1690784 137.005593,56.7195763 142.460425,62.1744081 C147.940536,67.6629464 149.479799,75.5755422 147.111919,82.4404282 L175.487156,110.815665 C182.352042,108.450594 190.273064,109.98143 195.755985,115.472777 C203.418591,123.132574 203.418591,135.547794 195.755985,143.213209 C188.09057,150.878624 175.67535,150.878624 168.007126,143.213209 C162.243319,137.443783 160.81922,128.977839 163.737639,121.877008 L137.275245,95.4146135 L137.272436,165.052198 C139.140337,165.979126 140.904309,167.212221 142.460425,168.762719 C150.123031,176.422516 150.123031,188.837736 142.460425,196.508768 C134.79501,204.171375 122.374173,204.171375 114.719993,196.508768 C107.057387,188.837736 107.057387,176.422516 114.719993,168.762719 C116.613174,166.872347 118.804095,165.442631 121.141077,164.481996 L121.141077,94.1955625 C118.804095,93.2405457 116.615983,91.8192558 114.719993,89.9148396 C108.914052,84.1173254 107.518042,75.5980132 110.492639,68.4690928 L81.4713611,39.4421974 L4.83125614,116.076685 C-1.60949009,122.52024 -1.60949009,132.960821 4.83125614,139.398759 L116.604747,251.166631 C123.039876,257.604569 133.477648,257.604569 139.921203,251.166631 L251.172245,139.9184 C257.61018,133.477654 257.61018,123.031455 251.172245,116.593517" fill="#DE4C36"></path>
       </svg>
     `;
     button.addEventListener('click', toggleDropdown);
@@ -198,17 +216,30 @@
     return document.querySelector('.TaskPaneExtraActionsButton');
   }
 
+  function findTaskPaneToolbar() {
+    return document.querySelector('.TaskPaneToolbar');
+  }
+
   function injectButton() {
-    if (branchButton && branchButton.parentNode) {
-      return;
+    const taskPane = document.querySelector('.TaskPane:not(.asana-git-branch-injected)');
+    
+    if (!taskPane) {
+      return false;
     }
+
+    taskPane.classList.add('asana-git-branch-injected');
+    console.log('[Asana Git] Found TaskPane, marking as injected');
 
     const moreActionsButton = findMoreActionsButton();
 
     if (!moreActionsButton) {
       console.log('[Asana Git] More Actions button not found');
+      taskPane.classList.remove('asana-git-branch-injected');
       return false;
     }
+
+    console.log('[Asana Git] Found More Actions button');
+    console.log('[Asana Git] Parent element:', moreActionsButton.parentNode);
 
     const button = createButton();
     const parent = moreActionsButton.parentNode;
@@ -216,31 +247,96 @@
     if (parent) {
       parent.insertBefore(button, moreActionsButton.nextSibling);
       branchButton = button;
+      
+      setTimeout(() => {
+        if (!document.body.contains(button)) {
+          console.error('[Asana Git] Button was removed from DOM after injection!');
+          taskPane.classList.remove('asana-git-branch-injected');
+        } else {
+          console.log('[Asana Git] Button is still in DOM');
+          const rect = button.getBoundingClientRect();
+          console.log('[Asana Git] Button dimensions:', rect.width, 'x', rect.height);
+          console.log('[Asana Git] Button visible:', rect.width > 0 && rect.height > 0);
+        }
+      }, 500);
+      
       console.log('[Asana Git] Button injected successfully');
       return true;
     }
 
+    console.log('[Asana Git] Parent node not found for More Actions button');
+    taskPane.classList.remove('asana-git-branch-injected');
     return false;
   }
 
   function init() {
-    const isTaskPage = window.location.pathname.includes('/task/');
-    console.log('[Asana Git] Init called, isTaskPage:', isTaskPage);
-
-    if (!isTaskPage) {
-      return;
+    if (observer) {
+      observer.disconnect();
     }
 
-    if (branchButton && branchButton.parentNode) {
-      return;
-    }
+    console.log('[Asana Git] Setting up MutationObserver');
+    
+    observer = new MutationObserver((mutations) => {
+      injectButton();
+    });
 
-    setTimeout(() => {
-      if (injectButton()) {
-        console.log('[Asana Git] Button injected on page load');
-      }
-    }, 500);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    console.log('[Asana Git] MutationObserver configured');
+
+    const intervals = [100, 500, 1000, 2000];
+    intervals.forEach(delay => {
+      setTimeout(() => {
+        if (injectButton()) {
+          console.log(`[Asana Git] Button injected at ${delay}ms`);
+        }
+      }, delay);
+    });
   }
 
   init();
+
+  window.addEventListener('popstate', () => {
+    console.log('[Asana Git] URL changed, checking for button injection');
+    injectButton();
+  });
+
+  const pushStateOriginal = history.pushState;
+  history.pushState = function() {
+    pushStateOriginal.apply(this, arguments);
+    console.log('[Asana Git] URL changed (pushState), checking for button injection');
+    setTimeout(injectButton, 100);
+  };
+
+  window.debugAsanaGit = () => {
+    console.log('[Asana Git Debug] ===== DEBUG INFO =====');
+    console.log('[Asana Git Debug] URL:', window.location.href);
+    console.log('[Asana Git Debug] Is task page:', window.location.pathname.includes('/task/'));
+    
+    const taskPane = document.querySelector('.TaskPane');
+    console.log('[Asana Git Debug] TaskPane found:', !!taskPane);
+    if (taskPane) {
+      console.log('[Asana Git Debug] TaskPane has injected class:', taskPane.classList.contains('asana-git-branch-injected'));
+    }
+    
+    const moreActions = document.querySelector('.TaskPaneExtraActionsButton');
+    console.log('[Asana Git Debug] MoreActions button found:', !!moreActions);
+    if (moreActions) {
+      console.log('[Asana Git Debug] MoreActions parent:', moreActions.parentNode);
+      console.log('[Asana Git Debug] MoreActions classes:', moreActions.className);
+    }
+    
+    const branchBtn = document.querySelector('.asana-git-branch-btn');
+    console.log('[Asana Git Debug] Branch button found:', !!branchBtn);
+    if (branchBtn) {
+      console.log('[Asana Git Debug] Branch button visible:', branchBtn.offsetWidth > 0 && branchBtn.offsetHeight > 0);
+      console.log('[Asana Git Debug] Branch button parent:', branchBtn.parentNode);
+    }
+    
+    console.log('[Asana Git Debug] Observer active:', !!observer);
+    console.log('[Asana Git Debug] ===== END DEBUG =====');
+  };
 })();

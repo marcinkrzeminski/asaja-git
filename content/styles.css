@@ -1,4 +1,4 @@
-.asana-git-branch-btn {
+.TaskPaneToolbar-button.asana-git-branch-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -8,7 +8,7 @@
   border: 1px solid transparent;
   border-radius: 6px;
   background-color: transparent;
-  color: #5f6368;
+  color: #DE4C36;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
   outline: none;
@@ -166,16 +166,32 @@
   padding: 8px 0;
 }
 
-.asana-git-branch-btn {
+.TaskPaneToolbar-button.asana-git-branch-btn:hover {
+    background-color: #3c4043;
+  }
+
+  .TaskPaneToolbar-button.asana-git-branch-btn:active {
+    background-color: #45484a;
+  }
+
+.TaskPaneToolbar-button.asana-git-branch-btn {
     color: #9aa0a6;
   }
 
-  .asana-git-branch-btn:hover {
-    background-color: #3c4043;
-    color: #e8eaed;
-  }
+.TaskPaneToolbar-button.asana-git-branch-btn:hover {
+  background-color: #f1f3f4;
+}
 
-  .asana-git-branch-btn:active {
+.TaskPaneToolbar-button.asana-git-branch-btn:active {
+  background-color: #e8eaed;
+}
+
+.TaskPaneToolbar-button.asana-git-branch-btn:focus {
+  outline: 2px solid #DE4C36;
+  outline-offset: 2px;
+}
+
+  .TaskPaneToolbar-button.asana-git-branch-btn:active {
     background-color: #45484a;
   }
 
