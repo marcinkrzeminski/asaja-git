@@ -27,32 +27,6 @@
     branchButton = button;
   }
 
-    const moreActionsButton = taskPaneEl.querySelector(
-      '.TaskPaneExtraActionsButton',
-    );
-
-    if (!moreActionsButton) {
-      return;
-    }
-
-    const button = createButton();
-    moreActionsButton.parentNode.insertBefore(button, moreActionsButton);
-    renderedElements.add(taskPaneEl);
-  }
-
-    const moreActionsButton = taskPaneEl.querySelector(
-      '.TaskPaneExtraActionsButton',
-    );
-
-    if (!moreActionsButton) {
-      return;
-    }
-
-    const button = createButton();
-    moreActionsButton.parentNode.insertBefore(button, moreActionsButton);
-    renderedElements.add(taskPaneEl);
-  }
-
   function observeTaskPanes() {
     const taskPanes = document.querySelectorAll('.TaskPane:not(.asana-git-observed)');
 
