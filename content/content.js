@@ -1,11 +1,6 @@
 (function() {
   'use strict';
 
-  console.log('[Asana Git] ===================================================');
-  console.log('[Asana Git] Content script loaded');
-  console.log('[Asana Git] Current URL:', window.location.href);
-  console.log('[Asana Git] ===================================================');
-
   let branchButton = null;
   let dropdown = null;
   let currentTaskId = null;
@@ -226,7 +221,6 @@
       dropdown.parentNode.removeChild(dropdown);
       dropdown = null;
       document.removeEventListener('click', handleOutsideClick);
-      console.log('[Asana Git] Closed dropdown');
     }
   }
 
@@ -240,18 +234,13 @@
     closeDropdownIfExists();
 
     taskPane.classList.add('asana-git-branch-injected');
-    console.log('[Asana Git] Found TaskPane, marking as injected');
 
     const moreActionsButton = findMoreActionsButton();
 
     if (!moreActionsButton) {
-      console.log('[Asana Git] More Actions button not found');
       taskPane.classList.remove('asana-git-branch-injected');
       return false;
     }
-
-    console.log('[Asana Git] Found More Actions button');
-    console.log('[Asana Git] Parent element:', moreActionsButton.parentNode);
 
     const button = createButton();
     const parent = moreActionsButton.parentNode;
@@ -259,24 +248,9 @@
     if (parent) {
       parent.insertBefore(button, moreActionsButton.nextSibling);
       branchButton = button;
-      
-      setTimeout(() => {
-        if (!document.body.contains(button)) {
-          console.error('[Asana Git] Button was removed from DOM after injection!');
-          taskPane.classList.remove('asana-git-branch-injected');
-        } else {
-          console.log('[Asana Git] Button is still in DOM');
-          const rect = button.getBoundingClientRect();
-          console.log('[Asana Git] Button dimensions:', rect.width, 'x', rect.height);
-          console.log('[Asana Git] Button visible:', rect.width > 0 && rect.height > 0);
-        }
-      }, 500);
-      
-      console.log('[Asana Git] Button injected successfully');
       return true;
     }
 
-    console.log('[Asana Git] Parent node not found for More Actions button');
     taskPane.classList.remove('asana-git-branch-injected');
     return false;
   }
@@ -286,8 +260,6 @@
       observer.disconnect();
     }
 
-    console.log('[Asana Git] Setting up MutationObserver');
-    
     observer = new MutationObserver((mutations) => {
       injectButton();
     });
@@ -297,14 +269,10 @@
       subtree: true
     });
 
-    console.log('[Asana Git] MutationObserver configured');
-
     const intervals = [100, 500, 1000, 2000];
     intervals.forEach(delay => {
       setTimeout(() => {
-        if (injectButton()) {
-          console.log(`[Asana Git] Button injected at ${delay}ms`);
-        }
+        injectButton();
       }, delay);
     });
   }
@@ -314,7 +282,6 @@
   function checkTaskChange() {
     const newTaskId = extractTaskId();
     if (newTaskId !== currentTaskId) {
-      console.log('[Asana Git] Task changed from', currentTaskId, 'to', newTaskId);
       currentTaskId = newTaskId;
       closeDropdownIfExists();
       injectButton();
@@ -324,43 +291,12 @@
   urlCheckInterval = setInterval(checkTaskChange, 100);
 
   window.addEventListener('popstate', () => {
-    console.log('[Asana Git] URL changed, checking for button injection');
     checkTaskChange();
   });
 
   const pushStateOriginal = history.pushState;
   history.pushState = function() {
     pushStateOriginal.apply(this, arguments);
-    console.log('[Asana Git] URL changed (pushState), checking for button injection');
     checkTaskChange();
-  };
-
-  window.debugAsanaGit = () => {
-    console.log('[Asana Git Debug] ===== DEBUG INFO =====');
-    console.log('[Asana Git Debug] URL:', window.location.href);
-    console.log('[Asana Git Debug] Is task page:', window.location.pathname.includes('/task/'));
-    
-    const taskPane = document.querySelector('.TaskPane');
-    console.log('[Asana Git Debug] TaskPane found:', !!taskPane);
-    if (taskPane) {
-      console.log('[Asana Git Debug] TaskPane has injected class:', taskPane.classList.contains('asana-git-branch-injected'));
-    }
-    
-    const moreActions = document.querySelector('.TaskPaneExtraActionsButton');
-    console.log('[Asana Git Debug] MoreActions button found:', !!moreActions);
-    if (moreActions) {
-      console.log('[Asana Git Debug] MoreActions parent:', moreActions.parentNode);
-      console.log('[Asana Git Debug] MoreActions classes:', moreActions.className);
-    }
-    
-    const branchBtn = document.querySelector('.asana-git-branch-btn');
-    console.log('[Asana Git Debug] Branch button found:', !!branchBtn);
-    if (branchBtn) {
-      console.log('[Asana Git Debug] Branch button visible:', branchBtn.offsetWidth > 0 && branchBtn.offsetHeight > 0);
-      console.log('[Asana Git Debug] Branch button parent:', branchBtn.parentNode);
-    }
-    
-    console.log('[Asana Git Debug] Observer active:', !!observer);
-    console.log('[Asana Git Debug] ===== END DEBUG =====');
   };
 })();

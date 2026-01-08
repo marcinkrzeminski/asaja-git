@@ -25,8 +25,7 @@
 }
 
 .asana-git-branch-btn:focus {
-  outline: 2px solid #2c4bff;
-  outline-offset: 2px;
+  outline: none;
 }
 
 .asana-git-branch-btn svg {
@@ -149,8 +148,7 @@
 }
 
 .copy-btn:focus {
-  outline: 2px solid #2c4bff;
-  outline-offset: 1px;
+  outline: none;
 }
 
 .copy-btn.copied {
@@ -187,8 +185,7 @@
 }
 
 .TaskPaneToolbar-button.asana-git-branch-btn:focus {
-  outline: 2px solid #DE4C36;
-  outline-offset: 2px;
+  outline: none;
 }
 
   .TaskPaneToolbar-button.asana-git-branch-btn:active {
